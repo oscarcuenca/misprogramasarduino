@@ -1,3 +1,4 @@
+//calibrador de luz visible. También se puede usar para receptor Ir
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
 //Set up the Liquid Crystal Display

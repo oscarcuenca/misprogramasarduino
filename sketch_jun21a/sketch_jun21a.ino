@@ -1,4 +1,4 @@
-//calibrador infrarrojo
+//calibrador UV
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
 //Set up the Liquid Crystal Display
@@ -11,15 +11,15 @@ char dispbuff[16];
 // Variables needed for RGB calculations
 float Gamma = 1.00;
 int MaxIntensity = 255;
-float fIr;
+float fUv;
 float Factor;
-int iIr;
-//IR light wavelengths between 700 and 2500 but we use maximum 940
-//Here, we start the IR Led with 700
-int i = 700;
-//IR emissor Led is plugged into these arduino digital pins
-const int InfraredOutPin = 8;
-// Receiver IR LED to be tested is plugged into A0
+int iUv;
+//UV light wavelengths between 10 and 400 but we use maximum 400
+//Here, we start the Uv Led with 10
+int i = 10;
+//Uv emissor Led is plugged into these arduino digital pins
+const int UltravioletOutPin = 8;
+// Receiver UV LED to be tested is plugged into A0
 int testPin = A0;
 // testPin = 11; (digital) para el sensor IR premontado
 // variables to store the value coming from the sensor
@@ -35,22 +35,22 @@ void setup()
 {
 pinMode(LCDOut, OUTPUT);
 pinMode(LCDIn, INPUT);
-//Set the IR LED pins to output
-pinMode(InfraredOutPin, OUTPUT);
+//Set the UV LED pins to output
+pinMode(UltravioletOutPin, OUTPUT);
 // Initialize the LCD display
 mySerialPort.begin(9600);
 mySerialPort.write(0xFE);
 mySerialPort.write(0x01);
-// test to see if the IR LED works
+// test to see if the UV LED works
 makeColor(i);
-analogWrite(InfraredOutPin,255-iIr);
+analogWrite(UltravioletOutPin,255-iUv);
 delay(5000);
 }
 void loop()
 {
-// set the IR LED to a specific inviseble range IR color
+// set the UV LED to a specific inviseble range UV color
 makeColor(i);
-analogWrite(InfraredOutPin, 255-iIr);
+analogWrite(UltravioletOutPin, 255-iUv);
 delay(500);
 // read the sensitivity of the Test LED
 sensorValueTest= analogRead(testPin);
@@ -68,8 +68,8 @@ sprintf(dispbuff,"%-16s",databuff);
 mySerialPort.print(dispbuff);
 writeData();
 i++;
-// If we've reached the upper limit of 940 nm, play a little melody
-if (i>940)
+// If we've reached the upper limit of 400 nm, play a little melody
+if (i>400)
 {
 for (int f = 0; f<=100; f++)
 {
@@ -100,28 +100,28 @@ EEPROM.write(addr++,mod);
 void makeColor(int lambda)
 {
 //blue  
-if (lambda >= 700 && lambda <= 940)
+if (lambda >= 10 && lambda <= 400)
 {
-fIr = -(lambda - (float)940.0) / ((float)940.0 - (float)700.0);
+fUv = -(lambda - (float)400.0) / ((float)400.0 - (float)10.0);
 //fGreen = (float)0.0;
 //fBlue = (float)1.0;
 }
 else
 {
-fIr = 0.0;
+fUv = 0.0;
 //fGreen = 0.0;
 //fBlue = 0.0;
 }
-if (lambda >= 700 && lambda <= 940)
+if (lambda >= 10 && lambda <= 400)
 {
-Factor = 0.3 + 0.7*(lambda - (float)700.0) / ((float)940.0 -
-(float)700.0);
+Factor = 0.3 + 0.7*(lambda - (float)10.0) / ((float)400.0 -
+(float)10.0);
 }
 else
 {
 Factor = 0.0;
 }
-iIr = factorAdjust(fIr, Factor, MaxIntensity, Gamma);
+iUv = factorAdjust(fUv, Factor, MaxIntensity, Gamma);
 }
 int factorAdjust(float C, float Factor, int MaxIntensity, float Gamma)
 {
