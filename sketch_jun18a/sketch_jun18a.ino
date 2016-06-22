@@ -1,13 +1,16 @@
 //calibrador de luz visible. También se puede usar para receptor Ir
 #include <EEPROM.h>
 #include <SoftwareSerial.h>
+
 //Set up the Liquid Crystal Display
 #define LCDIn 3
 #define LCDOut 2
 SoftwareSerial mySerialPort(LCDIn, LCDOut);
+
 //LCD Display buffers
 char databuff[16];
 char dispbuff[16];
+
 // Variables needed for RGB calculations
 float Gamma = 1.00;
 int MaxIntensity = 255;
@@ -18,6 +21,7 @@ float Factor;
 int iR;
 int iG;
 int iB;
+
 //Our eyes can generally see light wavelengths between 350 and 700
 //Here, we start the RGB Led with 350
 int i = 350;
@@ -25,14 +29,17 @@ int i = 350;
 const int redOutPin = 8;
 const int greenOutPin = 6;
 const int blueOutPin = 4;
+
 // LED to be tested is plugged into A0
 int testPin = A0;
+
 // variables to store the value coming from the sensor
 int sensorValueTest =0;
 int oldTest =0;
 int peaknm =0;
 //EEPROM start data
 int addr=0;
+
 //Music
 int notelen = 90;
 int dlx = 130;
@@ -44,10 +51,12 @@ pinMode(LCDIn, INPUT);
 pinMode(redOutPin, OUTPUT);
 pinMode(greenOutPin, OUTPUT);
 pinMode(blueOutPin, OUTPUT);
+
 // Initialize the LCD display
 mySerialPort.begin(9600);
 mySerialPort.write(0xFE);
 mySerialPort.write(0x01);
+
 // test to see if the RGB LED works
 makeColor(i);
 analogWrite(redOutPin,255-iR);
