@@ -6,6 +6,7 @@ by Patrick Di Justo
 #include <EEPROM.h>
 #include <SD.h>
 #include <SoftwareSerial.h>
+#include <SPI.h>
 // Liquid Crystal Display
 // Define the LCD pins: We'll be using a serial-based LCD display
 // which only required +3.3Volts, GND, and a single data line.
@@ -20,7 +21,7 @@ char databuff2[16];
 char dispbuff[16];
 
 // LED variables section
-// Which Arduino pin goes to which LED
+// Which Arduino pin goes to which LED. recivers
 int redPin = A1;
 int greenPin =A2;
 int bluePin=A3;
@@ -36,8 +37,6 @@ int iR;
 int iG;
 int iB;
 
-// variables to store the value coming from the sensor
-int peaknm =0;
 
 //Our eyes can generally see light wavelengths between 350 and 700
 //Here, we start the RGB Led with 350
@@ -53,12 +52,12 @@ const int blueOutPin = 4;
 int sensorValueRed =0;
 int sensorValueGreen =0;
 int sensorValueBlue = 0;
+int peaknm =0;
 
 //A place to store the maximum value for each LED
 int maxRed = 0;
 int maxGreen =0;
 int maxBlue = 0;
-
 
 
 //EEPROM variables
@@ -153,7 +152,7 @@ delay(1000);
 /*
 Back in setup(), we enabled a pullup resistor on the analog pins, which
 made it difficult for electricity to come into the analog pins.
-Here, we disable the pullup resistor, wait 500ms for the pin to
+Here, we disable the pullup resistor, wait 10ms for the pin to
 stabilize and to get the light
 read the voltage coming into the pin, then reenable the pullup
 resistor.
