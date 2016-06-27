@@ -1,7 +1,7 @@
 /*
-LED Photometer, based on Analog Input
-by Patrick Di Justo- Adapted by Óscar Cuenca
-2012 08 30 Adaptation Jun-22-2016
+LED Photometer, based on Analog Input. RGB emissor 2 pins IR led receiver
+by Patrick Di Justo. Adapted by Óscar Cuenca
+2012 08 30-original. Adaptation 2016-Jun.27
 */
 #include <EEPROM.h>
 #include <SD.h>
@@ -21,12 +21,12 @@ char databuff2[16];
 char dispbuff[16];
 
 // LED variables section
-// Which Arduino pin goes to which LED. recivers
-int redPin = A1;
-int greenPin =A2;
-int bluePin=A3;
+// Which Arduino pin goes to which LED. receivers
+int InfraRedPin = A1;
+//int greenPin =A2;
+//int bluePin=A3;
 
-// Variables needed for RGB calculations
+// Variables needed for Infrared Led calculations
 float Gamma = 1.00;
 int MaxIntensity = 255;
 float fBlue;
@@ -38,9 +38,10 @@ int iG;
 int iB;
 
 
-//Our eyes can generally see light wavelengths between 350 and 700
-//Here, we start the RGB Led with 350
+//Our eyes can generally see light wavelengths between 350 and 700 Infrared goes from 700 to 940
+
 int i = 350;
+// tray this, if not begin from 350 a try with normal light
 
 //RGB is plugged into these arduino digital pins
 const int redOutPin = 8;
@@ -49,23 +50,23 @@ const int blueOutPin = 4;
 
 
 // A place to store the values coming from the analog port
-int sensorValueRed =0;
-int sensorValueGreen =0;
-int sensorValueBlue = 0;
+int sensorValueInfraRed =0;
+//int sensorValueGreen =0;
+//int sensorValueBlue = 0;
 int peaknm =0;
 
 //A place to store the maximum value for each LED
-int maxRed = 0;
-int maxGreen =0;
-int maxBlue = 0;
+int maxInfraRed = 0;
+//int maxGreen =0;
+//int maxBlue = 0;
 
 
 //EEPROM variables
-// The record length is 7: 1 byte for the record number, 2 bytes
-// each for the 3 LEDs. For each additional LED you add, increase
+// The record length is 3: 1 byte for the record number, 2 bytes
+// for the IR LEDs. For each additional LED you add, increase
 // the record length by 2.
 int record=0;
-int reclen = 7;
+int reclen = 3;
 int addr =0;
 
 // the following variable is long because the time, measured in miliseconds,
@@ -97,12 +98,12 @@ Serial.begin(9600);
 // which makes it difficult for voltage to come into the Arduino,
 // until we're ready for it.
 Serial.println("Setting up the Analog Pins");
-pinMode(redPin, OUTPUT);
-digitalWrite(redPin, LOW);
-pinMode(greenPin, OUTPUT);
-digitalWrite(greenPin, LOW);
-pinMode(bluePin, OUTPUT);
-digitalWrite(bluePin, LOW);
+pinMode(InfraRedPin, OUTPUT);
+digitalWrite(InfraRedPin, LOW);
+//pinMode(greenPin, OUTPUT);
+//digitalWrite(greenPin, LOW);
+//pinMode(bluePin, OUTPUT);
+//digitalWrite(bluePin, LOW);
 
 // Set up SD card, let us know if SD card is absent
 //revisar con el sketch_humedad y temperatura el puerto usado en yun para la SD
@@ -148,7 +149,7 @@ analogWrite(blueOutPin, 255-iB);
 delay(1000);
 
 
-// read the value from the sensor:
+// read the value from the sensor IR:
 /*
 Back in setup(), we enabled a pullup resistor on the analog pins, which
 made it difficult for electricity to come into the analog pins.
@@ -157,45 +158,45 @@ stabilize and to get the light
 read the voltage coming into the pin, then reenable the pullup
 resistor.
 */
-pinMode(redPin, INPUT);
+pinMode(InfraRedPin, INPUT);
 delay(10);
-Serial.print("Reading red: ");
-sensorValueRed= analogRead(redPin);
-pinMode(redPin, OUTPUT);
-Serial.println(sensorValueRed);
+Serial.print("Reading Infrared: ");
+sensorValueInfraRed= analogRead(InfraRedPin);
+pinMode(InfraRedPin, OUTPUT);
+Serial.println(sensorValueInfraRed);
 delay(10);
-pinMode(greenPin, INPUT);
-delay(10);
-sensorValueGreen = analogRead(greenPin);
-pinMode(greenPin, OUTPUT);
-delay(10);
-pinMode(bluePin, INPUT);
-delay(10);
-sensorValueBlue = analogRead(bluePin);
-pinMode(bluePin, OUTPUT);
-delay(10);
+//pinMode(greenPin, INPUT);
+//delay(10);
+//sensorValueGreen = analogRead(greenPin);
+//pinMode(greenPin, OUTPUT);
+//delay(10);
+//pinMode(bluePin, INPUT);
+//delay(10);
+//sensorValueBlue = analogRead(bluePin);
+//pinMode(bluePin, OUTPUT);
+//delay(10);
 Serial.println("Comparing sensor values...");
 
 
 
 // Here we compare each sensor to its maximum value.
 // If any of the sensors has reached a new peak, sound a tone
-if( (sensorValueRed>maxRed)
-|| (sensorValueGreen>maxGreen)
-|| (sensorValueBlue>maxBlue))
-{
-tone(7,maxRed+maxGreen+maxBlue,1000);
+if( (sensorValueInfraRed>maxInfraRed)
+//|| (sensorValueGreen>maxGreen)
+//|| (sensorValueBlue>maxBlue))
+){
+tone(3,maxInfraRed,1000);
 timeSinceLastSensorHigh = millis();
 }
 
 // Here we reset the old maximum value with a new one, if necessary
-if(sensorValueRed>maxRed) maxRed = sensorValueRed;
-if(sensorValueGreen>maxGreen) maxGreen = sensorValueGreen;
-if(sensorValueBlue>maxBlue) maxBlue = sensorValueBlue;
+if(sensorValueInfraRed) maxInfraRed = sensorValueInfraRed;
+//if(sensorValueGreen>maxGreen) maxGreen = sensorValueGreen;
+//if(sensorValueBlue>maxBlue) maxBlue = sensorValueBlue;
 peaknm = i;
 
 // Display the sensor values on the LCD screen
-sprintf(databuff1,"R%3d G%3d B%3d",maxRed,maxGreen,maxBlue);
+sprintf(databuff1,"R%3d",maxInfraRed);
 sprintf(dispbuff,"%-16s",databuff1);
 mySerialPort.print(dispbuff);
 Serial.print(dispbuff);
@@ -208,8 +209,8 @@ if(dataWritten ==0)
 {
   writeData();
 i++;
-  // If we've reached the upper limit of 700 nm, 
-if (i>700)
+  // If we've reached the upper limit of 940 nm, 
+if (i>940)
 {
   delay(10000);
 }
@@ -239,32 +240,32 @@ You can't.
 What we're doing here is splitting the 10 bits of data into two sections,
 which can be stored in two bytes of memory space.
 */
-int quotient = sensorValueRed/256;
-int mod = sensorValueRed % 256;
+int quotient = sensorValueInfraRed/256;
+int mod = sensorValueInfraRed % 256;
 EEPROM.write(addr++,quotient);
 EEPROM.write(addr++,mod);
-quotient = sensorValueGreen/256;
-mod = sensorValueGreen % 256;
-EEPROM.write(addr++,quotient);
-EEPROM.write(addr++,mod);
-quotient = sensorValueBlue/256;
-mod = sensorValueBlue % 256;
-EEPROM.write(addr++,quotient);
-EEPROM.write(addr++,mod);
+//quotient = sensorValueGreen/256;
+//mod = sensorValueGreen % 256;
+//EEPROM.write(addr++,quotient);
+//EEPROM.write(addr++,mod);
+//quotient = sensorValueBlue/256;
+//mod = sensorValueBlue % 256;
+//EEPROM.write(addr++,quotient);
+//EEPROM.write(addr++,mod);
 dataWritten = 1;
 sprintf(databuff1,"EEPROM written");
 sprintf(dispbuff,"%-16s",databuff1);
 mySerialPort.print(dispbuff);
 Serial.println("FINAL BEEP");
-tone(7,196,notelen);
+tone(3,196,notelen);
 delay(dlx);
-tone(7,131,notelen);
+tone(3,131,notelen);
 delay(dlx);
-tone(7,261,notelen);
+tone(3,261,notelen);
 delay(dlx);
-tone(7,330,notelen);
+tone(3,330,notelen);
 delay(dlx);
-tone(7,294,notelen);
+tone(3,294,notelen);
 }
 void writeDataToSD(String dataString1, String dataString2)
 {
@@ -361,4 +362,3 @@ else
 return (int) round(MaxIntensity * pow(C * Factor, Gamma));
 }
 }
-
