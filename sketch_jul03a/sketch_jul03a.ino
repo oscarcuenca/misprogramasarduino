@@ -14,7 +14,7 @@ void setup() {
   
   Bridge.begin();
   Serial.begin(9600);
-  Serial.println("DHT11 test!");
+// Serial.println("DHT11 test!");
 
 dht.begin();
 //while(!Serial);
@@ -33,21 +33,21 @@ int temperatura = dht.readTemperature();
 //client.get(String("http://wi-sen.esy.es/dht11/sensorarduino.php?temperature=") + t + String("&humidity=") + h);
 //http://forum.arduino.cc/index.php?topic=366236.msg2528237#msg2528237
 //client.get(buffer);
-   if (isnan(temperatura) || isnan(humedad)) {
-    Serial.println("Failed to read from DHT");
-  } else {
+//  if (isnan(temperatura) || isnan(humedad)) {
+//  Serial.println("Failed to read from DHT");
+//} else {
     Process p;              
     p.begin("/root/curl.sh");      
     p.addParameter(String(temperatura)); 
     p.addParameter(String(humedad)); 
     p.run();
-    Serial.print("Humedad: ");
-    Serial.print(humedad);
-    Serial.print(" %\t");
-    Serial.print("Temperatura: ");
-    Serial.print(temperatura);
-    Serial.println(" *C");
-  }
+    //Serial.print("Humedad: ");
+    //Serial.print(humedad);
+    //Serial.print(" %\t");
+    //Serial.print("Temperatura: ");
+    //Serial.print(temperatura);
+    //Serial.println(" *C");
+//}
  delay(200000);   
-Serial.flush();
+//Serial.flush();
 }
